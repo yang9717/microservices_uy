@@ -1,0 +1,13 @@
+dev/
+u_config_server/
+ELK/logstash-8.17.1/
+ELK/elasticsearch-8.17.1/
+ELK/kibana-8.17.2/
+ELK/elasticsearch_creds.rtf
+.DS_Store
+.metadata/
+
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+*.log
