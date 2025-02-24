@@ -95,12 +95,13 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 		Instant now = Instant.now();
 
 		String token = Jwts.builder()
-			.subject(userDetails.getUserId())
-			.expiration(Date.from(now.plusMillis(
+				.claim("scope", auth.getAuthorities())
+				.subject(userDetails.getUserId())
+				.expiration(Date.from(now.plusMillis(
 					Long.parseLong(expTime))))
-			.issuedAt(Date.from(now))
-			.signWith(secretKey)
-			.compact();
+				.issuedAt(Date.from(now))
+				.signWith(secretKey)
+				.compact();
 		
 		res.addHeader("token", token);
 		res.addHeader("userId", userDetails.getUserId());

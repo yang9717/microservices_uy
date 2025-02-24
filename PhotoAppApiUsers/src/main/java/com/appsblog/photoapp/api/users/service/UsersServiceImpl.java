@@ -2,6 +2,7 @@ package com.appsblog.photoapp.api.users.service;
 
 import java.util.UUID;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -9,6 +10,8 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,6 +19,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.appsblog.photoapp.api.users.data.AlbumsServiceClient;
+import com.appsblog.photoapp.api.users.data.AuthorityEntity;
+import com.appsblog.photoapp.api.users.data.RoleEntity;
 import com.appsblog.photoapp.api.users.data.UserEntity;
 import com.appsblog.photoapp.api.users.data.UsersRepository;
 import com.appsblog.photoapp.api.users.shared.UserDto;
@@ -76,6 +81,25 @@ public class UsersServiceImpl implements UsersService {
 		
 		if (userEntity == null) throw new UsernameNotFoundException(username);
 		
+		Collection<GrantedAuthority> authorities = new ArrayList<>();
+		
+		Collection<RoleEntity> roles = userEntity.getRoles();
+		
+		roles.forEach((role) -> {
+			// Add a list of roles
+			authorities.add(new SimpleGrantedAuthority(role.getName()));
+			
+			// Get a list of authority entity objects
+			Collection<AuthorityEntity> authorityEntities = role.getAuthorities();
+			
+			// For each authority, create a new simple granted authority object that spring security framework expects.
+			authorityEntities.forEach((authorityEntity) -> {
+				authorities.add(new SimpleGrantedAuthority(authorityEntity.getName()));
+				});
+			}
+		);
+		
+		
 		return new User(
 				userEntity.getEmail(), 
 				userEntity.getEncryptedPassword(), 
@@ -83,7 +107,7 @@ public class UsersServiceImpl implements UsersService {
 				true, 
 				true, 
 				true, 
-				new ArrayList<>());
+				authorities);
 	}
 
 	@Override

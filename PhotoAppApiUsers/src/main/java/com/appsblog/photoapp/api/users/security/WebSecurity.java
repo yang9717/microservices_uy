@@ -6,15 +6,18 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import com.appsblog.photoapp.api.users.service.UsersService;
 
+@EnableMethodSecurity(prePostEnabled=true)
 @Configuration
 @EnableWebSecurity
 public class WebSecurity {
@@ -53,16 +56,16 @@ public class WebSecurity {
 		// Set the URL path for processing login requests
 		authenticationFilter.setFilterProcessesUrl(env.getProperty("login.url.path"));
 		
-
-		// Configure authorization rules
+		// Configure rules
 		http
 			.csrf(csrf -> csrf.disable())	// Disable CSRF protection
 			.authorizeHttpRequests((authz) -> authz
-		    	.requestMatchers(new AntPathRequestMatcher("/users/**", HttpMethod.POST.name())).permitAll()
-		    	.requestMatchers(new AntPathRequestMatcher("/users/**", HttpMethod.GET.name())).permitAll()
-		        .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
+				.requestMatchers(new AntPathRequestMatcher("/users/**")).access(
+							new WebExpressionAuthorizationManager("hasIpAddress('"+env.getProperty("gateway.ip")+"')"))
+				.requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
 		        .requestMatchers(new AntPathRequestMatcher("/actuator/**", HttpMethod.GET.name())).permitAll())
-		        .addFilter(authenticationFilter)	// For login ONLY
+		        .addFilter(new AuthorizationFilter(authenticationManager, env))
+				.addFilter(authenticationFilter)	// For login ONLY
 		        .authenticationManager(authenticationManager)
 		        .sessionManagement((session) -> session
 		                .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
