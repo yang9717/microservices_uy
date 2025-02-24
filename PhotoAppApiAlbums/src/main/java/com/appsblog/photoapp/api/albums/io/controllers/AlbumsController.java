@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,6 +35,7 @@ public class AlbumsController {
 				MediaType.APPLICATION_XML_VALUE,
 				MediaType.APPLICATION_JSON_VALUE
 	})
+	@PreAuthorize("principal == #id or hasAuthority('PROFILE.READ') or hasRole('ADMIN')")
 	public List<AlbumResponseModel> userAlbums(@PathVariable String id) {
 		List<AlbumResponseModel> returnValue = new ArrayList<>();
 		List<AlbumEntity> albumsEntities = albumsService.getAlbums(id);
@@ -50,4 +53,10 @@ public class AlbumsController {
 		return returnValue;
 
 	}
+	
+	@DeleteMapping("/{albumId}")
+    @PreAuthorize("principal == #id or hasRole('ADMIN')")
+    public String deleteAlbum(@PathVariable String id, @PathVariable String albumId) {
+    	return "User with id "+ id + " is allowed to delete album with id " + albumId;
+    }
 }
