@@ -122,7 +122,8 @@ public class UsersServiceImpl implements UsersService {
 	}
 
 	@Override
-	public UserDto getUserById(String userId) {
+	public UserDto getUserById(String userId, String authorization) {
+
 		UserEntity userEntity = usersRepository.findByUserId(userId);
 		
 		if (userEntity == null) throw new UsernameNotFoundException("User not found");
@@ -131,7 +132,7 @@ public class UsersServiceImpl implements UsersService {
 		
 		UserDto returnValue = modelMapper.map(userEntity, UserDto.class);
 		
-		List<AlbumResponseModel> albumsList = albumsServiceClient.getAlbums(userId);
+		List<AlbumResponseModel> albumsList = albumsServiceClient.getAlbums(userId, authorization);
 		
 		returnValue.setAlbums(albumsList);
 		

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -70,16 +71,17 @@ public class UsersController {
 					MediaType.APPLICATION_JSON_VALUE }
 			)
 	@PreAuthorize("hasRole('ADMIN') or principal == #userId")
-	public ResponseEntity<UserResponseModel> getUser(@PathVariable String userId) {
-		
+	public ResponseEntity<UserResponseModel> getUser(
+			@PathVariable String userId, 
+			@RequestHeader("Authorization") String authorization
+			) {
 		ModelMapper modelMapper = new ModelMapper();
 		
-		UserDto userDto = usersService.getUserById(userId);
+		UserDto userDto = usersService.getUserById(userId, authorization);
 		
 		UserResponseModel returnValue = modelMapper.map(userDto, UserResponseModel.class);
 		
 		return ResponseEntity.status(HttpStatus.OK).body(returnValue);
-		
 	}
 	
 	@PreAuthorize("hasRole('ADMIN') or hasAuthority('DELETE') or principal == #userId")
