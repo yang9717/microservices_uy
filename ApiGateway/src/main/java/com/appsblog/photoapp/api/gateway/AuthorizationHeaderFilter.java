@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -67,7 +69,11 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<Auth
 		ServerHttpResponse response = exchange.getResponse();
 		response.setStatusCode(httpStatus);
 		
-		return response.setComplete();
+		// Include error message in response body of Spring Cloud Gateway
+		DataBufferFactory bufferFactory = response.bufferFactory();
+		DataBuffer dataBuffer = bufferFactory.wrap(err.getBytes());
+		
+		return response.writeWith(Mono.just(dataBuffer));
 	}
 	
 	private boolean isJwtValid (String jwt) {
