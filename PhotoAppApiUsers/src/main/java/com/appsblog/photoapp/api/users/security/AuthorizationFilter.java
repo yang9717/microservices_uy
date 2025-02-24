@@ -1,10 +1,12 @@
 package com.appsblog.photoapp.api.users.security;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
@@ -61,22 +63,16 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
 		String token = authorizationHeader.substring(7);
 		String tokenSecret = env.getProperty("token.secret");
 		
-		if (tokenSecret == null) {
-			return null;
-		}
+		if (tokenSecret == null) return null;
 		
 		JwtClaimsParser jwtClaimsParser = new JwtClaimsParser(token, tokenSecret);
 		
 		String userId = jwtClaimsParser.getJwtSubject();
 		
-		if (userId == null) {
-            return null;
-        }
+		if (userId == null) return null;
 		
-		return new UsernamePasswordAuthenticationToken(
-				userId, 
-				null, 
-				jwtClaimsParser.getUserAuthorities()
-				);
+		Collection<? extends GrantedAuthority> userAuthotiries = jwtClaimsParser.getUserAuthorities();
+		
+		return new UsernamePasswordAuthenticationToken(userId, null, userAuthotiries);
 	}
 }
