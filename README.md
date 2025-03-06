@@ -53,7 +53,7 @@ The repository contains the following microservices and components:
 - Dockerization
 - AWS EC2 Deployment
 
-## Getting Started
+## 🕹️ Getting Started
 
 ### Prerequisites
 - Java 23
@@ -65,7 +65,7 @@ The repository contains the following microservices and components:
 - Docker (for cloud deployment)
 - AWS Account (for cloud deployment)
 
-### 🕹️ Local Setup
+### Local Setup
 1. Clone the repository
 2. Install dependencies
 3. Run Zipkin, Elasticsearch, Logstash, and RabbitMQ
